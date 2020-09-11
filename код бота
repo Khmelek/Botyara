@@ -1,0 +1,120 @@
+from telegram import Bot
+from telegram import Update
+from telegram import KeyboardButton
+from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardRemove
+from telegram.ext import CallbackContext
+from telegram.ext import Updater
+from telegram.ext import Filters
+from telegram.ext import MessageHandler
+from telegram.utils.request import Request
+
+
+button_delivery = 'Доставка'
+button_pay = 'Оплата'
+button_contacts = 'Контакты'
+button_pickup = 'Самовывоз'
+button_chat = 'чат'
+
+
+def log_error(f):
+
+    def inner(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            print(f'Ошибка: {e}')
+            raise e
+
+    return inner
+
+def button_delivery_handler(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        text='Информация о доставке полная',
+        #reply_markup=ReplyKeyboardRemove(),
+    )
+
+def button_pay_handler(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        text='Информация об оплате полная',
+        #reply_markup=ReplyKeyboardRemove(),
+    )
+
+def button_contacts_handler(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        text='Информация о доставке полная',
+        #reply_markup=ReplyKeyboardRemove(),
+    )
+
+def button_pickup_handler(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        text='Информация о самовывозе полная',
+        #reply_markup=ReplyKeyboardRemove(),
+    )
+
+def button_chat_handler(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        text='Ссылка на чат с оператором',
+        #reply_markup=ReplyKeyboardRemove(),
+    )
+
+@log_error
+def message_handler(update: Update, context: CallbackContext):
+    text = update.message.text
+    if text == button_delivery:
+        return button_delivery_handler(update=update, context=context)
+    if text == button_pay:
+        return button_pay_handler(update=update, context=context)
+    if text == button_contacts:
+        return button_contacts_handler(update=update, context=context)
+    if text == button_pickup:
+        return button_pickup_handler(update=update, context=context)
+    if text == button_chat:
+        return button_chat_handler(update=update, context=context)
+
+    reply_markup = ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(text=button_delivery),
+                KeyboardButton(text=button_pay),
+                KeyboardButton(text=button_contacts),
+                KeyboardButton(text=button_pickup),
+                KeyboardButton(text=button_chat),
+            ],
+        ],
+        resize_keyboard=True,
+    )
+
+    update.message.reply_text(
+        text='Добрый день, я помощник интернет-магазина сантехники Aculla.ru. Выберете нужную кнопку снизу, чтобы получить справку. Если вы хотите пообщаться с нашим оператором - нажмите "чат"',
+        reply_markup=reply_markup,
+    )
+
+
+def main():
+    print('Start')
+
+    req = Request(
+        connect_timeout=0.5,
+    )
+    bot = Bot(
+        request=req,
+        token='1346155561:AAHzAf7KWJJIFuAhNT--TE9kamp23FfkwSE',
+        base_url='https://telegg.ru/orig/bot',
+    )
+    updater = Updater(
+        bot=bot,
+        use_context=True,
+    )
+    print(updater.bot.get_me())
+
+    updater.dispatcher.add_handler(MessageHandler(filters=Filters.all, callback=message_handler))
+
+    updater.start_polling()
+    updater.idle()
+
+    print('Finish')
+
+
+if __name__ == '__main__':
+    main()
